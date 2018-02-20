@@ -13,7 +13,7 @@
 
 
 corvallis_temp <- read.csv("/dmine/code/git/clim401/CorvallisStateUniversity_temp_1895-2017_data.csv", header = TRUE)
-corvallis_precip <- read.csv("/dmine/code/git/clim401/CorvallisStateUniversity_precip_1895_2017_data_gridded.csv", header = TRUE)
+corvallis_precip <- read.csv("/dmine/code/git/clim401/CorvallisStateUniversity_precip_1895_2017_data.csv", header = TRUE)
 
 library(tidyr)
 library(car)
@@ -130,7 +130,7 @@ library(scales)
 
 yticks_val <- pretty_breaks(n=6)(anomalyfinal_precip)
 
-barplot(anomalyfinal_precip, col = "green", main = "Corvallis State University Station, OR \n Precipitation (mm) Anomalies for 2017 \n (% Departure from 1981-2010 Normals)", yaxt="n", ylab = "Percentage Departure from Normal (1981-2010 average)" )
+barplot(anomalyfinal_precip, col = "green", xlab = "Months", main = "Corvallis State University Station, OR \n Precipitation (mm) Anomalies for 2017 \n (% Departure from 1981-2010 Normals)", yaxt="n", ylab = "Percentage Departure from Normal (1981-2010 average)" )
 axis(2, at=yticks_val, lab=percent(yticks_val))
 abline(h = 1, lty = 2, col = "red")
 #--Anomaly Plot for Temperature
@@ -152,7 +152,7 @@ anomaly11<- anomaly[2,11] - anomaly[1,11]
 anomaly12<- anomaly[2,12] - anomaly[1,12]
 anomalyfinal <- cbind(anomaly1, anomaly2, anomaly3, anomaly4, anomaly5, anomaly6, anomaly7, anomaly8, anomaly9, anomaly10, anomaly11, anomaly12)
 colnames(anomalyfinal) <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-barplot(anomalyfinal, col = "green", main = "Corvallis State University Station, OR \n Temperature (Celsius) Anomalies for 2017 \n (Departure from 1981-2010 Normals)", ylim=c(-3, 3), ylab = "Departure from Normal (1981-2010 average) - degrees Celsius" )
+barplot(anomalyfinal, col = "green", xlab = "Months", main = "Corvallis State University Station, OR \n Temperature (Celsius) Anomalies for 2017 \n (Departure from 1981-2010 Normals)", ylim=c(-3, 3), ylab = "Departure from Normal (1981-2010 average) - degrees Celsius" )
 
 
 #--subsetting temp and precipitation for 1950-2017
