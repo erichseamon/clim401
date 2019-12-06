@@ -23,9 +23,6 @@ library(measurements)
 library(dplyr)
 
 
-#convert F to C
-combined_celsius <- fahrenheit.to.celsius(corvallis_temp_2016[,4,7,13])
-
 #--Table for Latitude, Longitude, and Elevation for Corvallis Station
 
 Description <- data.frame(c("Name", "Station", "Station State", "Latitude", "Longitude"))

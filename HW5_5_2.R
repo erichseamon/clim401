@@ -7,10 +7,6 @@
 #--in this instance, we are using Corvallis State University Station, OR
 #--the code loads the data, 
 
-
-corvallis_temp <- read.csv("/dmine/code/git/clim401/CorvallisStateUniversity_temp_1895-2017_data.csv", header = TRUE)
-corvallis_precip <- read.csv("/dmine/code/git/clim401/CorvallisStateUniversity_precip_1895_2017_data.csv", header = TRUE)
-
 library(tidyr)
 library(car)
 library(seas)
@@ -22,9 +18,181 @@ library(gridExtra)
 library(measurements)
 library(dplyr)
 
+all <- read.csv("/dmine/code/git/clim401/GEOG401_hw5_all.csv", header = TRUE)
+combined <- read.csv("/dmine/code/git/clim401/GEOG401_HW5_combined.csv", header = TRUE)
+clim_temp <-  read.csv("/dmine/code/git/clim401/climograph_temperature.csv", header = TRUE)
+clim_precip <-  read.csv("/dmine/code/git/clim401/climograph_precipitation.csv", header = TRUE)
+
 
 #convert F to C
-combined_celsius <- fahrenheit.to.celsius(corvallis_temp_2016[,4,7,13])
+combined$temp_sept_may_celsius <- fahrenheit.to.celsius(combined$temp_sept_may)
+combined$temp_apr_oct_celsius <- fahrenheit.to.celsius(combined$temp_apr_oct)
+combined$temp_nov_apr_celsius <- fahrenheit.to.celsius(combined$temp_nov_apr)
+
+
+#inches to mm
+combined$precip_nov_apr_mm <- combined$precip_nov_apr * 25.4
+combined$precip_sept_may_mm <- combined$precip_sept_may * 25.4
+
+#--ordering to look at wettest, driest, coldest, warmest
+
+#--ordering to look at wettest, driest, coldest, warmest
+
+#order by precip
+precip_ordered_nov_apr <- combined[order(combined$precip_normals_nov_apr),]
+#top 5 driest years for precip_nov_apr
+driest_ordered <-  precip_ordered_nov_apr[1:5,] 
+wettest_ordered <- precip_ordered_nov_apr[105:109,]
+
+driest_ordered <- as.data.frame(cbind(driest_ordered$year, driest_ordered$precip_normals_nov_apr, driest_ordered$growth_index))
+colnames(driest_ordered) <- c("year", "precip", "growth_index")
+driest_ordered <- driest_ordered[order(driest_ordered$precip),]
+
+wettest_ordered <- as.data.frame(cbind(wettest_ordered$year, wettest_ordered$precip_normals_nov_apr, wettest_ordered$growth_index))
+colnames(wettest_ordered) <- c("year", "precip", "growth_index")
+wettest_ordered <- wettest_ordered[order(-wettest_ordered$precip),]
+
+dates <- cbind(driest_ordered, wettest_ordered, coldest_ordered, warmest_ordered)
+grid.table(dates)
+
+
+#-----
+wet <- c(1,1,1,1,1)
+length(wet) <- 109
+wet <- rev(wet)
+combined_wettest <- cbind(precip_ordered_nov_apr, wet)
+theme_set(theme_bw() + theme(text = element_text(color = "black"),
+                             axis.text = element_text(color = "black")))
+ggplot(precip_ordered_nov_apr, aes(precip_ordered_nov_apr$growth_index,precip_ordered_nov_apr$temp_nov_apr_celsius)) + geom_text(aes(label=year, colour = combined_wettest$wet)) + ggtitle("Temperature (Nov - Apr) vs. Blue Oak Growth \n Top five wettest years are highlighted in RED") + theme(plot.title = element_text(hjust = 0.5)) + labs(x = "Growth Index", y = "Temperature (Celsius)") + scale_color_gradient(low="red",high="darkred")
+
+
+dry <- c(1,1,1,1,1)
+length(dry) <- 109
+
+combined_driest <- cbind(precip_ordered_nov_apr, dry)
+theme_set(theme_bw() + theme(text = element_text(color = "black"),
+                             axis.text = element_text(color = "black")))
+ggplot(precip_ordered_nov_apr, aes(precip_ordered_nov_apr$growth_index,precip_ordered_nov_apr$temp_nov_apr_celsius)) + geom_text(aes(label=year, colour = combined_driest$dry)) + ggtitle("Temperature (Nov - Apr) vs. Blue Oak Growth \n Top five driest years are highlighted in RED") + theme(plot.title = element_text(hjust = 0.5)) + labs(x = "Growth Index", y = "Temperature (Celsius)") + scale_color_gradient(low="red",high="darkred")
+
+
+#--create climograph for all years, precip vs temp
+
+clim_temp_1981_2010 <- colMeans(subset(clim_temp, year >= 1981))
+clim_temp_1981_2010 <- clim_temp_1981_2010[2:13]
+
+clim_precip_1981_2010 <- colMeans(subset(clim_precip, year >= 1981))
+clim_precip_1981_2010 <- clim_precip_1981_2010[2:13]
+
+clim_temp_1981_2010 <- fahrenheit.to.celsius(clim_temp_1981_2010)
+clim_precip_1981_2010 <- clim_precip_1981_2010 * 25.4
+
+twoord.plot(c(1:12), clim_temp_1981_2010, c(1:12), rylim=c(0,150), lylim=c(0,25), clim_precip_1981_2010, ylab = "Temperature (C)", xticklab=c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"), rylab = "Precipitation (mm)", xlab = "Months", type=c("bar", "b"), lcol = "green", rcol = "blue", main = "Mt. Diabo Temperature vs Precipitation, 1981-2010 \n Latitude 37.87N Longitude 121.95W ")
+
+
+
+
+
+#anomalies of wettest/driest/coldest/warmest years vs 1981_2010 normals
+
+anomaly1<- anomaly[2,1] - anomaly[1,1]
+anomaly2<- anomaly[2,2] - anomaly[1,2]
+anomaly3<- anomaly[2,3] - anomaly[1,3]
+anomaly4<- anomaly[2,4] - anomaly[1,4]
+anomaly5<- anomaly[2,5] - anomaly[1,5]
+anomaly6<- anomaly[2,6] - anomaly[1,6]
+anomaly7<- anomaly[2,7] - anomaly[1,7]
+anomaly8<- anomaly[2,8] - anomaly[1,8]
+anomaly9<- anomaly[2,9] - anomaly[1,9]
+anomaly10<- anomaly[2,10] - anomaly[1,10]
+anomaly11<- anomaly[2,11] - anomaly[1,11]
+anomaly12<- anomaly[2,12] - anomaly[1,12]
+anomalyfinal <- cbind(anomaly1, anomaly2, anomaly3, anomaly4, anomaly5, anomaly6, anomaly7, anomaly8, anomaly9, anomaly10, anomaly11, anomaly12)
+colnames(anomalyfinal) <- c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+barplot(anomalyfinal, col = "green", xlab = "Months", main = "Corvallis State University Station, OR \n Temperature (Celsius) Anomalies for 2017 \n (Departure from 1981-2010 Normals)", ylim=c(-3, 3), ylab = "Departure from Normal (1981-2010 average) - degrees Celsius" )
+
+
+#convert F to C
+combined$temp_sept_may_celsius <- fahrenheit.to.celsius(combined$temp_sept_may)
+combined$temp_apr_oct_celsius <- fahrenheit.to.celsius(combined$temp_apr_oct)
+combined$temp_nov_apr_celsius <- fahrenheit.to.celsius(combined$temp_nov_apr)
+
+
+#inches to mm
+combined$precip_nov_apr_mm <- combined$precip_nov_apr * 25.4
+combined$precip_sept_may_mm <- combined$precip_sept_may * 25.4
+
+#--ordering to look at wettest, driest, coldest, warmest
+
+xx <- as.vector(all$Growth.Index)
+ma <- function(x,n=5){stats::filter(x,rep(1/n,n), sides=2)}
+xxx <- as.data.frame(ma(xx, n=20))
+
+x4 <- cbind(all$Year, xxx)
+colnames(x4) <- c("Year", "growth_ave")
+
+
+#-20 year running average
+plot(x4$Year, x4$growth_ave, xlab = "Years", ylab = "Growth Index", main = "20 year running average - Blue Oak Growth Index \n 1645 - 1840")
+lines(x4$Year, x4$growth_ave)
+theme_set(theme_bw() + theme(text = element_text(color = "black"),
+                             axis.text = element_text(color = "black")))
+ggplot(all, aes(x = Year, y = Growth.Index)) +
+  geom_bar(stat = "identity", col = "lightblue") + geom_line(data=x4, aes(x=Year, y=growth_ave), colour="red") + ggtitle("Growth Index from 1645-1840 \n red line represents 5 year moving average") + theme(plot.title = element_text(hjust = 0.5)) + labs(y = "Growth Index", x = "Year")
+
+plot(combined$growth_index, combined$pdsi_apr_oct, ylab = "PDSI", xlab = "Growth Index", col = combined$Groups, main = "PDSI (Nov-Apr) vs. Blue Oak Growth Index \n (black = 1896-1950, red = 1950-2004")
+mod2<-lm(combined$pdsi_apr_oct~combined$growth_index)
+abline(coefficients(mod2), lwd=2, lty=2, col="red")
+correlation <- cor(combined$pdsi_apr_oct, combined$growth_index,method="pearson")
+text(.6, 4.5, paste("pearson's correlation =", round(correlation, 4),  "\n p-value =", round(summary(mod2)$coefficients[,4][2], 17)))
+
+pdsi <- ggplot(combined, aes(combined$growth_index,combined$pdsi_apr_oct) ) + geom_text(aes(label=year, colour = Groups)) + geom_abline(intercept = coefficients(mod2)[1], slope = coefficients(mod2)[2], lwd=2, lty=2, col="red") 
+pdsi + theme(plot.title = element_text(hjust = 0.5)) + ggtitle("PDSI (Nov-Apr) vs. Blue Oak Growth Index \n (black = 1896-1950, blue = 1950-2004)") + labs(y="PDSI ", x = "Growth Index") 
+
+
+
+plot(combined$growth_index, combined$spi_nov_apr, ylab = "Standardized Precipitation Index (SPI)", xlab = "Growth Index", col = combined$Groups, main = "Standardized Precipitation Index (Nov-Apr) vs. Blue Oak Growth Index \n black = 1896-1950, red = 1950-2004")
+mod2<-lm(combined$spi_nov_apr~combined$growth_index)
+abline(coefficients(mod2), lwd=2, lty=2, col="red")
+correlation <- cor(combined$spi_nov_apr, combined$growth_index,method="pearson")
+text(.65, 2, paste("pearson's correlation =", round(correlation, 4),  "\n p-value =", round(summary(mod2)$coefficients[,4][2], 17)))
+
+
+plot(combined$growth_index, combined$precip_nov_apr_mm, main = "Precipitation (Nov-Apr) vs. Blue Oak Growth Index \n (black = 1896-1950, red = 1950-2004)",ylab = "Precipitation (mm)", xlab = "Growth Index", col = combined$Groups)
+
+mod2<-lm(combined$precip_nov_apr_mm~combined$growth_index)
+abline(coefficients(mod2), lwd=2, lty=2, col="red")
+correlation <- cor(combined$precip_nov_apr_mm, combined$growth_index,method="pearson")
+
+
+text(.65, 1000, paste("pearson's correlation =", round(correlation, 4),  "\n p-value =", round(summary(mod2)$coefficients[,4][2], 17)))
+
+
+
+plot(combined$growth_index, combined$temp_apr_oct_celsius, col = combined$Groups, ylab = "Temperature (Celsius)", xlab = "Growth Index", main = "Temperature (Apr-Oct) vs. Blue Oak Growth Index \n (black = 1896-1950, red = 1950-2004)")
+mod2<-lm(combined$temp_apr_oct_celsius~combined$growth_index)
+abline(coefficients(mod2), lwd=2, lty=2, col="red")
+correlation <- cor(combined$temp_apr_oct_celsius, combined$growth_index,method="pearson")
+
+text(.62, 19, paste("pearson's correlation =", round(correlation, 4),  "\n p-value =", round(summary(mod2)$coefficients[,4][2], 6)))
+
+
+plot(combined$growth_index, combined$temp_nov_apr_celsius, col = combined$Groups, ylab = "Temperature (Celsius)", xlab = "Growth Index", main = "Temperature (Nov-Apr) vs. Blue Oak Growth Index \n (black = 1896-1950, red = 1950-2004)")
+mod2<-lm(combined$temp_nov_apr_celsius~combined$growth_index)
+abline(coefficients(mod2), lwd=2, lty=2, col="red")
+correlation <- cor(combined$temp_nov_apr_celsius, combined$growth_index,method="pearson")
+
+text(.62, 11, paste("pearson's correlation =", round(correlation, 4),  "\n p-value =", round(summary(mod2)$coefficients[,4][2], 6)))
+
+
+
+
+
+
+
+
+
+
+
 
 #--Table for Latitude, Longitude, and Elevation for Corvallis Station
 
